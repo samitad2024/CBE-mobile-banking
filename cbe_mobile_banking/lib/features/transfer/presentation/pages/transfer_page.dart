@@ -78,9 +78,12 @@ class _TransferView extends StatelessWidget {
                   const Spacer(),
                   AppPrimaryButton(
                     label: 'Confirm Transfer',
-                    onPressed: () => context
-                        .read<TransferBloc>()
-                        .add(const TransferConfirmed()),
+                    onPressed: () => context.read<TransferBloc>().add(
+                          TransferConfirmed(
+                            idempotencyKey:
+                                'tx-${DateTime.now().millisecondsSinceEpoch}',
+                          ),
+                        ),
                   ),
                 ],
               ),

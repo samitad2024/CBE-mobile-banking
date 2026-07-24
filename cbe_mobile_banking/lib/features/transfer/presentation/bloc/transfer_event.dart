@@ -53,7 +53,21 @@ final class TransferReviewRequested extends TransferEvent {
 }
 
 final class TransferConfirmed extends TransferEvent {
-  const TransferConfirmed();
+  const TransferConfirmed({required this.idempotencyKey});
+
+  final String idempotencyKey;
+
+  @override
+  List<Object?> get props => [idempotencyKey];
+}
+
+final class TransferRetried extends TransferEvent {
+  const TransferRetried({required this.idempotencyKey});
+
+  final String idempotencyKey;
+
+  @override
+  List<Object?> get props => [idempotencyKey];
 }
 
 final class TransferReset extends TransferEvent {

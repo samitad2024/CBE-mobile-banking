@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:cbe_mobile_banking/features/transfer/domain/entities/transfer_entity.dart';
 import 'package:cbe_mobile_banking/features/transfer/domain/usecases/submit_transfer_usecase.dart';
 import 'package:cbe_mobile_banking/features/transfer/presentation/bloc/transfer_event.dart';
@@ -13,13 +14,18 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
     on<TransferDestinationChanged>(_onDestinationChanged);
     on<TransferAmountChanged>(_onAmountChanged);
     on<TransferReviewRequested>(_onReview);
-    on<TransferConfirmed>(_onConfirm);
+    on<TransferConfirmed>(_onConfirm, transformer: droppable());
+    on<TransferRetried>(_onRetry, transformer: droppable());
     on<TransferReset>(_onReset);
   }
 
   final SubmitTransferUseCase _submitTransfer;
+  final Set<String> _processedKeys = <String>{};
+  TransferDraftEntity? _lastDraft;
 
   void _onStarted(TransferStarted event, Emitter<TransferState> emit) {
+    _processedKeys.clear();
+    _lastDraft = null;
     emit(const TransferFormState());
   }
 
@@ -77,30 +83,51 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
       );
       return;
     }
-    emit(
-      TransferConfirmState(
-        TransferDraftEntity(
-          rail: form.rail,
-          receiverName: form.receiverName.trim(),
-          destination: form.destination.trim(),
-          amountEtb: amount,
-        ),
-      ),
+    final draft = TransferDraftEntity(
+      rail: form.rail,
+      receiverName: form.receiverName.trim(),
+      destination: form.destination.trim(),
+      amountEtb: amount,
     );
+    _lastDraft = draft;
+    emit(TransferConfirmState(draft));
   }
 
   Future<void> _onConfirm(
     TransferConfirmed event,
     Emitter<TransferState> emit,
   ) async {
+    if (_processedKeys.contains(event.idempotencyKey)) {
+      return;
+    }
     final confirm = state;
     if (confirm is! TransferConfirmState) return;
-    emit(TransferSubmitting(confirm.draft));
-    final result = await _submitTransfer(confirm.draft);
+    await _submit(confirm.draft, event.idempotencyKey, emit);
+  }
+
+  Future<void> _onRetry(
+    TransferRetried event,
+    Emitter<TransferState> emit,
+  ) async {
+    final draft = _lastDraft;
+    if (draft == null) return;
+    if (_processedKeys.contains(event.idempotencyKey)) return;
+    emit(TransferConfirmState(draft));
+    await _submit(draft, event.idempotencyKey, emit);
+  }
+
+  Future<void> _submit(
+    TransferDraftEntity draft,
+    String key,
+    Emitter<TransferState> emit,
+  ) async {
+    emit(TransferSubmitting(draft));
+    final result = await _submitTransfer(draft);
     if (result.failure != null) {
       emit(TransferFailureState(result.failure!.message));
       return;
     }
+    _processedKeys.add(key);
     emit(TransferSuccessState(result.result!));
   }
 
