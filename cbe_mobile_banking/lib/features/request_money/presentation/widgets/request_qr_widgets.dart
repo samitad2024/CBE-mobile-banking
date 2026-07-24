@@ -1,6 +1,6 @@
-import 'dart:math' as math;
-
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
+import 'package:cbe_mobile_banking/core/widgets/scan_viewfinder.dart';
 import 'package:flutter/material.dart';
 
 /// Decorative QR placeholder rendered from payload bits (no camera package).
@@ -102,74 +102,18 @@ class ScanQrSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.plumDeep,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.peach.withValues(alpha: 0.5)),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(
-                      Icons.qr_code_scanner,
-                      size: 72,
-                      color: AppColors.peach.withValues(alpha: 0.7),
-                    ),
-                    Positioned(
-                      top: 16,
-                      left: 16,
-                      child: _corner(),
-                    ),
-                    Positioned(
-                      top: 16,
-                      right: 16,
-                      child: Transform.rotate(angle: math.pi / 2, child: _corner()),
-                    ),
-                    Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: Transform.rotate(angle: math.pi, child: _corner()),
-                    ),
-                    Positioned(
-                      bottom: 16,
-                      left: 16,
-                      child: Transform.rotate(angle: -math.pi / 2, child: _corner()),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            const ScanViewfinder(),
             const SizedBox(height: 16),
             const Text(
               'Align the QR code within the frame',
               style: TextStyle(color: AppColors.muted),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: onMockDetect,
-                child: const Text('Simulate scan'),
-              ),
+            AppPrimaryButton(
+              label: 'Simulate scan',
+              onPressed: onMockDetect,
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _corner() {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: AppColors.peach, width: 3),
-          left: BorderSide(color: AppColors.peach, width: 3),
         ),
       ),
     );
