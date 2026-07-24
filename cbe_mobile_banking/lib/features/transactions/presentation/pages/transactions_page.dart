@@ -1,6 +1,7 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/utils/money_formatter.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_empty_state.dart';
 import 'package:cbe_mobile_banking/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/bloc/transactions_bloc.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/bloc/transactions_event.dart';
@@ -80,6 +81,12 @@ class _TransactionsView extends StatelessWidget {
           }
           if (state is! TransactionsLoaded) {
             return const SizedBox.shrink();
+          }
+          if (state.items.isEmpty) {
+            return const AppEmptyState(
+              title: 'No transactions',
+              subtitle: 'Your recent transfers and payments will show here.',
+            );
           }
           return ListView.separated(
             padding: const EdgeInsets.all(16),
