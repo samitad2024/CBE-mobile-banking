@@ -167,30 +167,6 @@ class _HomeView extends StatelessWidget {
           );
         },
       ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 1:
-              context.push(AppRoutes.scan);
-            case 2:
-              context.push(AppRoutes.wallet);
-            case 3:
-              context.push(AppRoutes.settings);
-          }
-        },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(
-            icon: Icon(Icons.qr_code_scanner),
-            label: 'Scan',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-      ),
     );
   }
 }
