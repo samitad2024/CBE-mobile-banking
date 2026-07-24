@@ -4,11 +4,13 @@ import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_search_field.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_secondary_button.dart';
+import 'package:cbe_mobile_banking/features/home/domain/entities/home_search_hit.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/bloc/home_bloc.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/bloc/home_event.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/bloc/home_state.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_balance_card.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_requests_banner.dart';
+import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_search_results.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_service_tile.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_transfer_again_row.dart';
 import 'package:flutter/material.dart';
@@ -69,8 +71,16 @@ class _HomeView extends StatelessWidget {
                 children: [
                   AppSearchField(
                     onQrTap: () => context.go(AppRoutes.scan),
+                    onChanged: (q) =>
+                        context.read<HomeBloc>().add(HomeSearchChanged(q)),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 10),
+                  HomeSearchResults(
+                    query: state.searchQuery,
+                    hits: state.searchHits,
+                    onSelect: (hit) => _openHit(context, hit),
+                  ),
+                  const SizedBox(height: 8),
                   HomeBalanceCard(
                     account: state.dashboard.account,
                     isBalanceVisible: state.isBalanceVisible,
@@ -144,5 +154,24 @@ class _HomeView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _openHit(BuildContext context, HomeSearchHit hit) {
+    switch (hit.destination) {
+      case HomeSearchDestination.transfer:
+        context.push(AppRoutes.transfer);
+      case HomeSearchDestination.requestMoney:
+        context.push(AppRoutes.requestMoney);
+      case HomeSearchDestination.requestsInbox:
+        context.push(AppRoutes.requestsInbox);
+      case HomeSearchDestination.transactions:
+        context.push(AppRoutes.transactions);
+      case HomeSearchDestination.scan:
+        context.go(AppRoutes.scan);
+      case HomeSearchDestination.wallet:
+        context.go(AppRoutes.wallet);
+      case HomeSearchDestination.settings:
+        context.go(AppRoutes.settings);
+    }
   }
 }

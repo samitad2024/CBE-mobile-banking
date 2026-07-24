@@ -18,3 +18,12 @@ final class HomeRefreshed extends HomeEvent {
 final class HomeBalanceVisibilityToggled extends HomeEvent {
   const HomeBalanceVisibilityToggled();
 }
+
+final class HomeSearchChanged extends HomeEvent {
+  const HomeSearchChanged(this.query);
+
+  final String query;
+
+  @override
+  List<Object?> get props => [query];
+}

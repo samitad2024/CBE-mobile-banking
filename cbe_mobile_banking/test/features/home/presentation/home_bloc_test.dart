@@ -20,7 +20,14 @@ class _FakeHomeRepository implements HomeRepository {
           balanceEtb: 100,
           updatedAt: DateTime(2024),
         ),
-        recentRecipients: const [],
+        recentRecipients: const [
+          RecentRecipientEntity(
+            initial: 'A',
+            lastFour: '5744',
+            fullName: 'Ahmed Abdella Yesuf',
+            accountNumber: '1000582005744',
+          ),
+        ],
         pendingRequestCount: 0,
       ),
     );
@@ -52,5 +59,23 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 20));
     final loaded = bloc.state as HomeLoaded;
     expect(loaded.isBalanceVisible, isTrue);
+  });
+
+  test('debounced search returns shortcut and recipient hits', () async {
+    bloc.add(const HomeStarted());
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    bloc.add(const HomeSearchChanged('trans'));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    var loaded = bloc.state as HomeLoaded;
+    expect(loaded.searchHits, isNotEmpty);
+    expect(
+      loaded.searchHits.any((h) => h.title.toLowerCase().contains('trans')),
+      isTrue,
+    );
+
+    bloc.add(const HomeSearchChanged('Ahmed'));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    loaded = bloc.state as HomeLoaded;
+    expect(loaded.searchHits.any((h) => h.title.contains('Ahmed')), isTrue);
   });
 }
