@@ -1,4 +1,5 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_empty_state.dart';
 import 'package:cbe_mobile_banking/features/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,6 +30,12 @@ class _WalletView extends StatelessWidget {
           }
           if (state is! WalletLoaded) {
             return const SizedBox.shrink();
+          }
+          if (state.linkedWallets.isEmpty) {
+            return const AppEmptyState(
+              title: 'No wallets',
+              subtitle: 'Linked wallets will appear here.',
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
