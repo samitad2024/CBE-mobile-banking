@@ -16,6 +16,10 @@ final class SettingsBiometricsToggled extends SettingsEvent {
   const SettingsBiometricsToggled();
 }
 
+final class SettingsLogoutRequested extends SettingsEvent {
+  const SettingsLogoutRequested();
+}
+
 sealed class SettingsState extends Equatable {
   const SettingsState();
 
@@ -31,23 +35,28 @@ final class SettingsLoaded extends SettingsState {
   const SettingsLoaded({
     this.biometricsEnabled = true,
     this.maskedLanguage = 'English',
+    this.logoutRequested = false,
   });
 
   final bool biometricsEnabled;
   final String maskedLanguage;
+  final bool logoutRequested;
 
   SettingsLoaded copyWith({
     bool? biometricsEnabled,
     String? maskedLanguage,
+    bool? logoutRequested,
   }) {
     return SettingsLoaded(
       biometricsEnabled: biometricsEnabled ?? this.biometricsEnabled,
       maskedLanguage: maskedLanguage ?? this.maskedLanguage,
+      logoutRequested: logoutRequested ?? this.logoutRequested,
     );
   }
 
   @override
-  List<Object?> get props => [biometricsEnabled, maskedLanguage];
+  List<Object?> get props =>
+      [biometricsEnabled, maskedLanguage, logoutRequested];
 }
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
@@ -61,6 +70,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         emit(
           current.copyWith(biometricsEnabled: !current.biometricsEnabled),
         );
+      }
+    });
+    on<SettingsLogoutRequested>((event, emit) {
+      final current = state;
+      if (current is SettingsLoaded) {
+        emit(current.copyWith(logoutRequested: true));
       }
     });
   }

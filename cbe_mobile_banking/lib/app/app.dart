@@ -3,6 +3,7 @@ import 'package:cbe_mobile_banking/app/router/app_router.dart';
 import 'package:cbe_mobile_banking/core/theme/app_theme.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/app_lock_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
+import 'package:cbe_mobile_banking/features/auth/presentation/widgets/app_lifecycle_lock_binder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,11 +20,13 @@ class CbeMobileBankingApp extends StatelessWidget {
           value: sl<AppLockBloc>()..add(const AppLockStarted()),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'CBE Mobile Banking',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        routerConfig: AppRouter.createRouter(sl<AuthSessionBloc>()),
+      child: AppLifecycleLockBinder(
+        child: MaterialApp.router(
+          title: 'CBE Mobile Banking',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark,
+          routerConfig: AppRouter.createRouter(sl<AuthSessionBloc>()),
+        ),
       ),
     );
   }
