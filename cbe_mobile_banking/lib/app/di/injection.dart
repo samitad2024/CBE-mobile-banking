@@ -3,6 +3,7 @@ import 'package:cbe_mobile_banking/core/security/biometric_gateway.dart';
 import 'package:cbe_mobile_banking/core/security/biometric_gateway_impl.dart';
 import 'package:cbe_mobile_banking/core/security/in_memory_secure_storage_gateway.dart';
 import 'package:cbe_mobile_banking/core/security/mock_biometric_gateway.dart';
+import 'package:cbe_mobile_banking/core/security/screen_security_gateway.dart';
 import 'package:cbe_mobile_banking/core/security/secure_config.dart';
 import 'package:cbe_mobile_banking/core/security/secure_storage_gateway.dart';
 import 'package:cbe_mobile_banking/core/security/secure_storage_gateway_impl.dart';
@@ -80,6 +81,9 @@ void _registerCore() {
       )
       ..registerLazySingleton<BiometricGateway>(BiometricGatewayImpl.new);
   }
+
+  // FLAG_SECURE channel; no-ops when plugin/channel unavailable (tests/desktop).
+  sl.registerLazySingleton<ScreenSecurityGateway>(ScreenSecurityGatewayImpl.new);
 }
 
 void _registerAuth() {

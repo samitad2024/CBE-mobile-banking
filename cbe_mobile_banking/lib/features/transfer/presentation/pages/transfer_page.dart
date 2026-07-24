@@ -4,6 +4,7 @@ import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/utils/account_masker.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_search_field.dart';
+import 'package:cbe_mobile_banking/core/widgets/secure_screen.dart';
 import 'package:cbe_mobile_banking/core/widgets/transfer_request_toggle.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_state.dart';
@@ -25,7 +26,7 @@ class TransferPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<TransferBloc>()..add(const TransferStarted()),
-      child: const _TransferView(),
+      child: const SecureScreen(child: _TransferView()),
     );
   }
 }

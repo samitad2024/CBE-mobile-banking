@@ -1,5 +1,6 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/app/router/app_router.dart';
+import 'package:cbe_mobile_banking/core/security/biometric_gateway.dart';
 import 'package:cbe_mobile_banking/core/theme/app_theme.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/app_lock_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
@@ -20,13 +21,17 @@ class CbeMobileBankingApp extends StatelessWidget {
           value: sl<AppLockBloc>()..add(const AppLockStarted()),
         ),
       ],
-      child: AppLifecycleLockBinder(
-        child: MaterialApp.router(
-          title: 'CBE Mobile Banking',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.dark,
-          routerConfig: AppRouter.createRouter(sl<AuthSessionBloc>()),
-        ),
+      child: MaterialApp.router(
+        title: 'CBE Mobile Banking',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        routerConfig: AppRouter.createRouter(sl<AuthSessionBloc>()),
+        builder: (context, child) {
+          return AppLifecycleLockBinder(
+            biometricGateway: sl<BiometricGateway>(),
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }

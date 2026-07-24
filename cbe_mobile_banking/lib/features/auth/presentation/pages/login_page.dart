@@ -2,6 +2,7 @@ import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/core/constants/app_constants.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
+import 'package:cbe_mobile_banking/core/widgets/secure_screen.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_event.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
@@ -21,7 +22,7 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<AuthBloc>(),
-      child: const _LoginView(),
+      child: const SecureScreen(child: _LoginView()),
     );
   }
 }

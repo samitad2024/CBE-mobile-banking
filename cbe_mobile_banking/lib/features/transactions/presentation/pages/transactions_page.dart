@@ -1,6 +1,7 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_empty_state.dart';
+import 'package:cbe_mobile_banking/core/widgets/secure_screen.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/bloc/transactions_bloc.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/bloc/transactions_event.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/bloc/transactions_state.dart';
@@ -132,9 +133,11 @@ class _TransactionsViewState extends State<_TransactionsView> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) {
-        return ReceiptDetailSheet(
-          receipt: receipt,
-          onClose: () => Navigator.of(sheetContext).pop(),
+        return SecureScreen(
+          child: ReceiptDetailSheet(
+            receipt: receipt,
+            onClose: () => Navigator.of(sheetContext).pop(),
+          ),
         );
       },
     ).whenComplete(() {
