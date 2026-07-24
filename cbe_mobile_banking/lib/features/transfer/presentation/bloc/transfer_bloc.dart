@@ -16,6 +16,7 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
     on<TransferReviewRequested>(_onReview);
     on<TransferConfirmed>(_onConfirm, transformer: droppable());
     on<TransferRetried>(_onRetry, transformer: droppable());
+    on<TransferConfirmDismissed>(_onConfirmDismissed);
     on<TransferReset>(_onReset);
   }
 
@@ -125,10 +126,28 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
     final result = await _submitTransfer(draft);
     if (result.failure != null) {
       emit(TransferFailureState(result.failure!.message));
+      emit(TransferConfirmState(draft));
       return;
     }
     _processedKeys.add(key);
     emit(TransferSuccessState(result.result!));
+  }
+
+  void _onConfirmDismissed(
+    TransferConfirmDismissed event,
+    Emitter<TransferState> emit,
+  ) {
+    final confirm = state;
+    if (confirm is! TransferConfirmState) return;
+    final d = confirm.draft;
+    emit(
+      TransferFormState(
+        rail: d.rail,
+        receiverName: d.receiverName,
+        destination: d.destination,
+        amountText: d.amountEtb.toStringAsFixed(2),
+      ),
+    );
   }
 
   void _onReset(TransferReset event, Emitter<TransferState> emit) {

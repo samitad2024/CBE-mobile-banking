@@ -70,6 +70,10 @@ final class TransferRetried extends TransferEvent {
   List<Object?> get props => [idempotencyKey];
 }
 
+final class TransferConfirmDismissed extends TransferEvent {
+  const TransferConfirmDismissed();
+}
+
 final class TransferReset extends TransferEvent {
   const TransferReset();
 }

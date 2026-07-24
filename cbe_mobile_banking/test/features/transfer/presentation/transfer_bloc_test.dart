@@ -68,4 +68,21 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 80));
     expect(repo.submitCount, 1);
   });
+
+  test('dismiss confirm restores form with draft values', () async {
+    bloc
+      ..add(const TransferReceiverChanged('Ada'))
+      ..add(const TransferDestinationChanged('1000'))
+      ..add(const TransferAmountChanged('100'))
+      ..add(const TransferReviewRequested());
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+
+    bloc.add(const TransferConfirmDismissed());
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    final form = bloc.state;
+    expect(form, isA<TransferFormState>());
+    form as TransferFormState;
+    expect(form.receiverName, 'Ada');
+    expect(form.destination, '1000');
+  });
 }
