@@ -119,9 +119,12 @@ class _RequestMoneyView extends StatelessWidget {
                 label: state.mode == RequestMode.qr
                     ? 'Generate QR code'
                     : 'Send Request',
-                onPressed: () => context
-                    .read<RequestMoneyBloc>()
-                    .add(const RequestSubmitted()),
+                onPressed: () => context.read<RequestMoneyBloc>().add(
+                      RequestSubmitted(
+                        idempotencyKey:
+                            'req-${DateTime.now().millisecondsSinceEpoch}',
+                      ),
+                    ),
               ),
             ],
           );

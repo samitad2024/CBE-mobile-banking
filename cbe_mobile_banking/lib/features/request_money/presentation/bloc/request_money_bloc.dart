@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/entities/payment_request_entity.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/usecases/create_payment_request_usecase.dart';
 import 'package:cbe_mobile_banking/features/request_money/presentation/bloc/request_money_event.dart';
@@ -11,12 +12,14 @@ class RequestMoneyBloc extends Bloc<RequestMoneyEvent, RequestMoneyState> {
     on<RequestModeSelected>(_onMode);
     on<RequestAmountChanged>(_onAmount);
     on<RequestAccountChanged>(_onAccount);
-    on<RequestSubmitted>(_onSubmit);
+    on<RequestSubmitted>(_onSubmit, transformer: droppable());
   }
 
   final CreatePaymentRequestUseCase _createPaymentRequest;
+  final Set<String> _processedKeys = <String>{};
 
   void _onStarted(RequestMoneyStarted event, Emitter<RequestMoneyState> emit) {
+    _processedKeys.clear();
     emit(const RequestMoneyFormState());
   }
 
@@ -45,6 +48,7 @@ class RequestMoneyBloc extends Bloc<RequestMoneyEvent, RequestMoneyState> {
     RequestSubmitted event,
     Emitter<RequestMoneyState> emit,
   ) async {
+    if (_processedKeys.contains(event.idempotencyKey)) return;
     final form = state;
     if (form is! RequestMoneyFormState) return;
     final amount = form.amountEtb;
@@ -68,6 +72,7 @@ class RequestMoneyBloc extends Bloc<RequestMoneyEvent, RequestMoneyState> {
       emit(RequestMoneyFailureState(result.failure!.message));
       return;
     }
+    _processedKeys.add(event.idempotencyKey);
     emit(RequestMoneySuccessState(result.request!));
   }
 }

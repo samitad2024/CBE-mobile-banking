@@ -40,5 +40,10 @@ final class RequestAccountChanged extends RequestMoneyEvent {
 }
 
 final class RequestSubmitted extends RequestMoneyEvent {
-  const RequestSubmitted();
+  const RequestSubmitted({required this.idempotencyKey});
+
+  final String idempotencyKey;
+
+  @override
+  List<Object?> get props => [idempotencyKey];
 }
