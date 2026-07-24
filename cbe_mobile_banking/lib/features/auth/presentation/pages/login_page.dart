@@ -1,14 +1,14 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
-import 'package:cbe_mobile_banking/app/router/app_router.dart';
 import 'package:cbe_mobile_banking/core/constants/app_constants.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_event.dart';
+import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
+import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_event.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 /// Login placeholder aligned to PDF (PIN + biometrics). Pixel UI later.
 class LoginPage extends StatelessWidget {
@@ -44,7 +44,9 @@ class _LoginViewState extends State<_LoginView> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess) {
-          context.go(AppRoutes.home);
+          context.read<AuthSessionBloc>().add(
+                AuthSessionLoggedIn(state.session),
+              );
         }
         if (state is AuthFailureState) {
           ScaffoldMessenger.of(context).showSnackBar(

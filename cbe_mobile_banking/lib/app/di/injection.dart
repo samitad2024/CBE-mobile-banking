@@ -10,10 +10,15 @@ import 'package:cbe_mobile_banking/core/security/session_manager.dart';
 import 'package:cbe_mobile_banking/core/utils/app_logger.dart';
 import 'package:cbe_mobile_banking/features/auth/data/datasources/auth_mock_datasource.dart';
 import 'package:cbe_mobile_banking/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:cbe_mobile_banking/features/auth/data/repositories/session_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/auth/domain/repositories/auth_repository.dart';
+import 'package:cbe_mobile_banking/features/auth/domain/repositories/session_repository.dart';
 import 'package:cbe_mobile_banking/features/auth/domain/usecases/login_with_biometrics_usecase.dart';
 import 'package:cbe_mobile_banking/features/auth/domain/usecases/login_with_pin_usecase.dart';
+import 'package:cbe_mobile_banking/features/auth/domain/usecases/session_usecases.dart';
+import 'package:cbe_mobile_banking/features/auth/presentation/bloc/app_lock_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
 import 'package:cbe_mobile_banking/features/home/data/datasources/home_mock_datasource.dart';
 import 'package:cbe_mobile_banking/features/home/data/repositories/home_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/home/domain/repositories/home_repository.dart';
@@ -88,8 +93,25 @@ void _registerAuth() {
         sessionManager: sl(),
       ),
     )
+    ..registerLazySingleton<SessionRepository>(
+      () => SessionRepositoryImpl(
+        secureStorage: sl(),
+        sessionManager: sl(),
+      ),
+    )
     ..registerLazySingleton(() => LoginWithPinUseCase(sl()))
     ..registerLazySingleton(() => LoginWithBiometricsUseCase(sl()))
+    ..registerLazySingleton(() => RestoreSessionUseCase(sl()))
+    ..registerLazySingleton(() => PersistSessionUseCase(sl()))
+    ..registerLazySingleton(() => ClearSessionUseCase(sl()))
+    ..registerLazySingleton(
+      () => AuthSessionBloc(
+        restoreSession: sl(),
+        persistSession: sl(),
+        clearSession: sl(),
+      ),
+    )
+    ..registerLazySingleton(AppLockBloc.new)
     ..registerFactory(
       () => AuthBloc(
         loginWithPin: sl(),
