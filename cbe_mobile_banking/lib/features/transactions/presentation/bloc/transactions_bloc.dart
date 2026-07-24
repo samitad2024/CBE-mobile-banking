@@ -7,8 +7,9 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   TransactionsBloc({
     required this._getTransactions,
     required this._getReceipt,
-  })  : super(const TransactionsInitial()) {
+  }) : super(const TransactionsInitial()) {
     on<TransactionsStarted>(_onStarted);
+    on<TransactionsRefreshed>(_onRefreshed);
     on<TransactionSelected>(_onSelected);
     on<ReceiptDismissed>(_onDismissed);
   }
@@ -19,7 +20,16 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   Future<void> _onStarted(
     TransactionsStarted event,
     Emitter<TransactionsState> emit,
-  ) async {
+  ) =>
+      _load(emit);
+
+  Future<void> _onRefreshed(
+    TransactionsRefreshed event,
+    Emitter<TransactionsState> emit,
+  ) =>
+      _load(emit);
+
+  Future<void> _load(Emitter<TransactionsState> emit) async {
     emit(const TransactionsLoading());
     final result = await _getTransactions();
     if (result.failure != null) {

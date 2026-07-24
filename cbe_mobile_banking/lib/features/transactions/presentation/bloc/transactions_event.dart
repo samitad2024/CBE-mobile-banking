@@ -23,3 +23,7 @@ final class TransactionSelected extends TransactionsEvent {
 final class ReceiptDismissed extends TransactionsEvent {
   const ReceiptDismissed();
 }
+
+final class TransactionsRefreshed extends TransactionsEvent {
+  const TransactionsRefreshed();
+}
