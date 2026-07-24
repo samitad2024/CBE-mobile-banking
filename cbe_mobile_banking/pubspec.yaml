@@ -1,0 +1,31 @@
+name: cbe_mobile_banking
+description: Commercial Bank of Ethiopia (CBE) mobile banking app — redesign (mock-first).
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  cupertino_icons: ^1.0.8
+  dio: ^5.8.0+1
+  equatable: ^2.0.7
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  flutter_secure_storage: ^9.2.4
+  get_it: ^8.0.3
+  go_router: ^15.1.2
+  local_auth: ^2.3.0
+  logger: ^2.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  # Mock phase: prefer simple Equatable models (see README).
+  # Add freezed + json_serializable + build_runner when API contracts land.
+  very_good_analysis: ^9.0.0
+
+flutter:
+  uses-material-design: true

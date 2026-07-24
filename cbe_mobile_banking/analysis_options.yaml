@@ -1,0 +1,22 @@
+# Strict lints for a production fintech codebase.
+# https://pub.dev/packages/very_good_analysis
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    # Treat missing returns / invalid nullability as errors early.
+    missing_required_param: error
+    missing_return: error
+    invalid_assignment: error
+
+linter:
+  rules:
+    # Prefer explicit public APIs as the codebase grows.
+    public_member_api_docs: false
+    # Keep lines readable in Cursor/VS Code without fighting PDF copy lengths later.
+    lines_longer_than_80_chars: false
+    # Clean Architecture repositories/datasources often start with one method.
+    one_member_abstracts: false

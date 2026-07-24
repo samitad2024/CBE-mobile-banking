@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Fintech baseline: block cleartext (HTTP) traffic in production.
+  Debug builds may still use Flutter tooling over localhost via debug manifest.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
