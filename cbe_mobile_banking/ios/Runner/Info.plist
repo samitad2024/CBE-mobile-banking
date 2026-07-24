@@ -11,6 +11,8 @@
 	<!-- local_auth / Face ID — required before using biometrics on iOS -->
 	<key>NSFaceIDUsageDescription</key>
 	<string>Authenticate securely to open CBE Mobile Banking.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Scan payment QR codes to transfer or request money.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

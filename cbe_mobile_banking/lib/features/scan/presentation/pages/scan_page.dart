@@ -4,6 +4,7 @@ import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_secondary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/scan_viewfinder.dart';
 import 'package:cbe_mobile_banking/features/scan/presentation/bloc/scan_bloc.dart';
+import 'package:cbe_mobile_banking/features/scan/presentation/widgets/camera_scan_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,8 +20,16 @@ class ScanPage extends StatelessWidget {
   }
 }
 
-class _ScanView extends StatelessWidget {
+class _ScanView extends StatefulWidget {
   const _ScanView();
+
+  @override
+  State<_ScanView> createState() => _ScanViewState();
+}
+
+class _ScanViewState extends State<_ScanView> {
+  var _showSimulate = false;
+  var _cameraKey = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +39,17 @@ class _ScanView extends StatelessWidget {
         title: const Text('Scan QR code'),
         automaticallyImplyLeading: false,
       ),
-      body: BlocBuilder<ScanBloc, ScanState>(
+      body: BlocConsumer<ScanBloc, ScanState>(
+        listener: (context, state) {
+          if (state is ScanFailure) {
+            setState(() => _showSimulate = true);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
         builder: (context, state) {
+          final listening = state is ScanListening || state is ScanIdle;
           return Padding(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
             child: Column(
@@ -41,7 +59,9 @@ class _ScanView extends StatelessWidget {
                     ScanIdle() || ScanListening() =>
                       'Align the QR code within the frame',
                     ScanSuccess() => 'QR detected',
+                    ScanFailure(:final message) => message,
                   },
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: AppColors.muted,
                     fontSize: 14,
@@ -52,9 +72,9 @@ class _ScanView extends StatelessWidget {
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 320),
-                      child: ScanViewfinder(
-                        child: state is ScanSuccess
-                            ? Column(
+                      child: state is ScanSuccess
+                          ? ScanViewfinder(
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Icon(
@@ -78,25 +98,45 @@ class _ScanView extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-                              )
-                            : null,
-                      ),
+                              ),
+                            )
+                          : CameraScanPreview(
+                              key: ValueKey(_cameraKey),
+                              enabled: listening,
+                              onCode: (payload) {
+                                context
+                                    .read<ScanBloc>()
+                                    .add(ScanCodeDetected(payload));
+                              },
+                              onCameraError: (message) {
+                                setState(() => _showSimulate = true);
+                                context
+                                    .read<ScanBloc>()
+                                    .add(ScanFailed(message));
+                              },
+                            ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-                if (state is ScanListening || state is ScanIdle)
+                if (listening && _showSimulate)
                   AppPrimaryButton(
                     label: 'Simulate scan',
                     icon: Icons.qr_code_2,
                     onPressed: () => context.read<ScanBloc>().add(
-                          const ScanMockCodeDetected('CBE|PAY|MOCK|50000'),
+                          const ScanCodeDetected('CBE|PAY|MOCK|50000'),
                         ),
+                  ),
+                if (listening && !_showSimulate)
+                  const Text(
+                    'Point your camera at a CBE payment QR',
+                    style: TextStyle(color: AppColors.muted, fontSize: 12),
                   ),
                 if (state is ScanSuccess) ...[
                   AppPrimaryButton(
                     label: 'Scan again',
                     onPressed: () {
+                      setState(() => _cameraKey++);
                       context.read<ScanBloc>()
                         ..add(const ScanReset())
                         ..add(const ScanStarted());
@@ -113,6 +153,28 @@ class _ScanView extends StatelessWidget {
                         ),
                       );
                     },
+                  ),
+                ],
+                if (state is ScanFailure) ...[
+                  const SizedBox(height: 12),
+                  AppPrimaryButton(
+                    label: 'Retry camera',
+                    onPressed: () {
+                      setState(() {
+                        _showSimulate = false;
+                        _cameraKey++;
+                      });
+                      context.read<ScanBloc>()
+                        ..add(const ScanReset())
+                        ..add(const ScanStarted());
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  AppSecondaryButton(
+                    label: 'Simulate scan',
+                    onPressed: () => context.read<ScanBloc>().add(
+                          const ScanCodeDetected('CBE|PAY|MOCK|50000'),
+                        ),
                   ),
                 ],
               ],
