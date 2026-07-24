@@ -1,12 +1,13 @@
 import 'package:cbe_mobile_banking/features/transactions/domain/entities/transaction_entity.dart';
 
-abstract interface class TransactionsMockDataSource {
+/// Transactions data contract — mock and remote share this interface.
+abstract interface class TransactionsDataSource {
   Future<List<TransactionEntity>> fetchTransactions();
 
   Future<ReceiptEntity> fetchReceipt(String id);
 }
 
-class TransactionsMockDataSourceImpl implements TransactionsMockDataSource {
+class TransactionsMockDataSourceImpl implements TransactionsDataSource {
   @override
   Future<List<TransactionEntity>> fetchTransactions() async {
     await Future<void>.delayed(const Duration(milliseconds: 200));

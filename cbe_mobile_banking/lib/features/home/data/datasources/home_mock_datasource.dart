@@ -1,10 +1,11 @@
 import 'package:cbe_mobile_banking/features/home/domain/entities/home_dashboard_entity.dart';
 
-abstract interface class HomeMockDataSource {
+/// Home data contract — mock and remote share this interface.
+abstract interface class HomeDataSource {
   Future<HomeDashboardEntity> fetchDashboard();
 }
 
-class HomeMockDataSourceImpl implements HomeMockDataSource {
+class HomeMockDataSourceImpl implements HomeDataSource {
   @override
   Future<HomeDashboardEntity> fetchDashboard() async {
     await Future<void>.delayed(const Duration(milliseconds: 250));

@@ -8,11 +8,11 @@ import 'package:cbe_mobile_banking/features/auth/domain/repositories/auth_reposi
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
-    required this._mockDataSource,
+    required this._dataSource,
     required this._sessionManager,
   });
 
-  final AuthMockDataSource _mockDataSource;
+  final AuthDataSource _dataSource;
   final SessionManager _sessionManager;
 
   @override
@@ -20,12 +20,16 @@ class AuthRepositoryImpl implements AuthRepository {
     String pin,
   ) async {
     try {
-      final model = await _mockDataSource.loginWithPin(pin);
+      final model = await _dataSource.loginWithPin(pin);
       final session = SessionMapper.toEntity(model);
       _sessionManager.setSession(token: session.token);
       return (failure: null, session: session);
     } on AuthException catch (e) {
       return (failure: AuthFailure(e.message), session: null);
+    } on NetworkException catch (e) {
+      return (failure: NetworkFailure(e.message), session: null);
+    } on ServerException catch (e) {
+      return (failure: ServerFailure(e.message), session: null);
     } on Exception {
       return (failure: const UnexpectedFailure(), session: null);
     }
@@ -35,12 +39,16 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<({Failure? failure, SessionEntity? session})>
       loginWithBiometrics() async {
     try {
-      final model = await _mockDataSource.loginWithBiometrics();
+      final model = await _dataSource.loginWithBiometrics();
       final session = SessionMapper.toEntity(model);
       _sessionManager.setSession(token: session.token);
       return (failure: null, session: session);
     } on AuthException catch (e) {
       return (failure: AuthFailure(e.message), session: null);
+    } on NetworkException catch (e) {
+      return (failure: NetworkFailure(e.message), session: null);
+    } on ServerException catch (e) {
+      return (failure: ServerFailure(e.message), session: null);
     } on Exception {
       return (failure: const UnexpectedFailure(), session: null);
     }

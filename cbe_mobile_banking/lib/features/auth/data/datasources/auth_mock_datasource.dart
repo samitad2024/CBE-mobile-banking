@@ -3,14 +3,14 @@ import 'package:cbe_mobile_banking/core/error/exceptions.dart';
 import 'package:cbe_mobile_banking/core/security/biometric_gateway.dart';
 import 'package:cbe_mobile_banking/features/auth/data/models/session_model.dart';
 
-/// Mock auth source — accepts PIN `1234` or successful biometrics.
-abstract interface class AuthMockDataSource {
+/// Auth data contract — mock and remote share this interface.
+abstract interface class AuthDataSource {
   Future<SessionModel> loginWithPin(String pin);
 
   Future<SessionModel> loginWithBiometrics();
 }
 
-class AuthMockDataSourceImpl implements AuthMockDataSource {
+class AuthMockDataSourceImpl implements AuthDataSource {
   AuthMockDataSourceImpl(this._biometricGateway);
 
   final BiometricGateway _biometricGateway;

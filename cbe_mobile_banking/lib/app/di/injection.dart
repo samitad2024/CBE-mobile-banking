@@ -10,6 +10,7 @@ import 'package:cbe_mobile_banking/core/security/secure_storage_gateway_impl.dar
 import 'package:cbe_mobile_banking/core/security/session_manager.dart';
 import 'package:cbe_mobile_banking/core/utils/app_logger.dart';
 import 'package:cbe_mobile_banking/features/auth/data/datasources/auth_mock_datasource.dart';
+import 'package:cbe_mobile_banking/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:cbe_mobile_banking/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/auth/data/repositories/session_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/auth/domain/repositories/auth_repository.dart';
@@ -21,11 +22,13 @@ import 'package:cbe_mobile_banking/features/auth/presentation/bloc/app_lock_bloc
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
 import 'package:cbe_mobile_banking/features/home/data/datasources/home_mock_datasource.dart';
+import 'package:cbe_mobile_banking/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:cbe_mobile_banking/features/home/data/repositories/home_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/home/domain/repositories/home_repository.dart';
 import 'package:cbe_mobile_banking/features/home/domain/usecases/get_home_dashboard_usecase.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/bloc/home_bloc.dart';
 import 'package:cbe_mobile_banking/features/request_money/data/datasources/request_money_mock_datasource.dart';
+import 'package:cbe_mobile_banking/features/request_money/data/datasources/request_money_remote_datasource.dart';
 import 'package:cbe_mobile_banking/features/request_money/data/repositories/request_money_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/repositories/request_money_repository.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/usecases/create_payment_request_usecase.dart';
@@ -35,11 +38,13 @@ import 'package:cbe_mobile_banking/features/request_money/presentation/bloc/requ
 import 'package:cbe_mobile_banking/features/scan/presentation/bloc/scan_bloc.dart';
 import 'package:cbe_mobile_banking/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:cbe_mobile_banking/features/transactions/data/datasources/transactions_mock_datasource.dart';
+import 'package:cbe_mobile_banking/features/transactions/data/datasources/transactions_remote_datasource.dart';
 import 'package:cbe_mobile_banking/features/transactions/data/repositories/transactions_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/transactions/domain/repositories/transactions_repository.dart';
 import 'package:cbe_mobile_banking/features/transactions/domain/usecases/transactions_usecases.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/bloc/transactions_bloc.dart';
 import 'package:cbe_mobile_banking/features/transfer/data/datasources/transfer_mock_datasource.dart';
+import 'package:cbe_mobile_banking/features/transfer/data/datasources/transfer_remote_datasource.dart';
 import 'package:cbe_mobile_banking/features/transfer/data/repositories/transfer_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/transfer/domain/repositories/transfer_repository.dart';
 import 'package:cbe_mobile_banking/features/transfer/domain/usecases/submit_transfer_usecase.dart';
@@ -62,13 +67,14 @@ Future<void> configureDependencies() async {
   _registerRequestMoney();
   _registerTransactions();
   _registerScanWalletSettings();
-  AppLogger.d('Dependencies configured (full BLoC graph)');
+  AppLogger.d(
+    'Dependencies configured '
+    '(${SecureConfig.isMock ? 'mock' : 'remote'} datasources)',
+  );
 }
 
 void _registerCore() {
-  sl
-    ..registerLazySingleton<DioClient>(DioClient.new)
-    ..registerLazySingleton<SessionManager>(MockSessionManager.new);
+  sl.registerLazySingleton<SessionManager>(MockSessionManager.new);
 
   if (SecureConfig.isMock) {
     sl
@@ -84,18 +90,33 @@ void _registerCore() {
       ..registerLazySingleton<BiometricGateway>(BiometricGatewayImpl.new);
   }
 
-  // FLAG_SECURE channel; no-ops when plugin/channel unavailable (tests/desktop).
-  sl.registerLazySingleton<ScreenSecurityGateway>(ScreenSecurityGatewayImpl.new);
+  sl
+    ..registerLazySingleton<DioClient>(
+      () => DioClient(sessionManager: sl()),
+    )
+    ..registerLazySingleton<ScreenSecurityGateway>(
+      ScreenSecurityGatewayImpl.new,
+    );
 }
 
 void _registerAuth() {
-  sl
-    ..registerLazySingleton<AuthMockDataSource>(
+  if (SecureConfig.isMock) {
+    sl.registerLazySingleton<AuthDataSource>(
       () => AuthMockDataSourceImpl(sl()),
-    )
+    );
+  } else {
+    sl.registerLazySingleton<AuthDataSource>(
+      () => AuthRemoteDataSourceImpl(
+        dioClient: sl(),
+        biometricGateway: sl(),
+      ),
+    );
+  }
+
+  sl
     ..registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(
-        mockDataSource: sl(),
+        dataSource: sl(),
         sessionManager: sl(),
       ),
     )
@@ -127,34 +148,55 @@ void _registerAuth() {
 }
 
 void _registerHome() {
+  if (SecureConfig.isMock) {
+    sl.registerLazySingleton<HomeDataSource>(HomeMockDataSourceImpl.new);
+  } else {
+    sl.registerLazySingleton<HomeDataSource>(
+      () => HomeRemoteDataSourceImpl(dioClient: sl()),
+    );
+  }
+
   sl
-    ..registerLazySingleton<HomeMockDataSource>(HomeMockDataSourceImpl.new)
     ..registerLazySingleton<HomeRepository>(
-      () => HomeRepositoryImpl(mockDataSource: sl()),
+      () => HomeRepositoryImpl(dataSource: sl()),
     )
     ..registerLazySingleton(() => GetHomeDashboardUseCase(sl()))
     ..registerFactory(() => HomeBloc(getHomeDashboard: sl()));
 }
 
 void _registerTransfer() {
-  sl
-    ..registerLazySingleton<TransferMockDataSource>(
+  if (SecureConfig.isMock) {
+    sl.registerLazySingleton<TransferDataSource>(
       TransferMockDataSourceImpl.new,
-    )
+    );
+  } else {
+    sl.registerLazySingleton<TransferDataSource>(
+      () => TransferRemoteDataSourceImpl(dioClient: sl()),
+    );
+  }
+
+  sl
     ..registerLazySingleton<TransferRepository>(
-      () => TransferRepositoryImpl(mockDataSource: sl()),
+      () => TransferRepositoryImpl(dataSource: sl()),
     )
     ..registerLazySingleton(() => SubmitTransferUseCase(sl()))
     ..registerFactory(() => TransferBloc(submitTransfer: sl()));
 }
 
 void _registerRequestMoney() {
-  sl
-    ..registerLazySingleton<RequestMoneyMockDataSource>(
+  if (SecureConfig.isMock) {
+    sl.registerLazySingleton<RequestMoneyDataSource>(
       RequestMoneyMockDataSourceImpl.new,
-    )
+    );
+  } else {
+    sl.registerLazySingleton<RequestMoneyDataSource>(
+      () => RequestMoneyRemoteDataSourceImpl(dioClient: sl()),
+    );
+  }
+
+  sl
     ..registerLazySingleton<RequestMoneyRepository>(
-      () => RequestMoneyRepositoryImpl(mockDataSource: sl()),
+      () => RequestMoneyRepositoryImpl(dataSource: sl()),
     )
     ..registerLazySingleton(() => CreatePaymentRequestUseCase(sl()))
     ..registerLazySingleton(() => GetPendingRequestsUseCase(sl()))
@@ -167,12 +209,19 @@ void _registerRequestMoney() {
 }
 
 void _registerTransactions() {
-  sl
-    ..registerLazySingleton<TransactionsMockDataSource>(
+  if (SecureConfig.isMock) {
+    sl.registerLazySingleton<TransactionsDataSource>(
       TransactionsMockDataSourceImpl.new,
-    )
+    );
+  } else {
+    sl.registerLazySingleton<TransactionsDataSource>(
+      () => TransactionsRemoteDataSourceImpl(dioClient: sl()),
+    );
+  }
+
+  sl
     ..registerLazySingleton<TransactionsRepository>(
-      () => TransactionsRepositoryImpl(mockDataSource: sl()),
+      () => TransactionsRepositoryImpl(dataSource: sl()),
     )
     ..registerLazySingleton(() => GetTransactionsUseCase(sl()))
     ..registerLazySingleton(() => GetReceiptUseCase(sl()))
