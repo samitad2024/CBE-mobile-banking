@@ -3,6 +3,8 @@ import 'package:cbe_mobile_banking/app/router/app_router.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/utils/money_formatter.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_empty_state.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_error_state.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_loading_indicator.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_secondary_button.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/entities/incoming_request_entity.dart';
@@ -42,22 +44,14 @@ class _RequestsInboxView extends StatelessWidget {
       body: BlocBuilder<RequestsInboxBloc, RequestsInboxState>(
         builder: (context, state) {
           if (state is RequestsInboxLoading || state is RequestsInboxInitial) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppLoadingIndicator(label: 'Loading requests…');
           }
           if (state is RequestsInboxFailure) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(state.message),
-                  TextButton(
-                    onPressed: () => context
-                        .read<RequestsInboxBloc>()
-                        .add(const RequestsInboxRefreshed()),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+            return AppErrorState(
+              message: state.message,
+              onRetry: () => context
+                  .read<RequestsInboxBloc>()
+                  .add(const RequestsInboxRefreshed()),
             );
           }
           if (state is! RequestsInboxLoaded) {

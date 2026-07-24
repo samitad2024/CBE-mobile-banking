@@ -1,6 +1,7 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/utils/account_masker.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_loading_indicator.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_secondary_button.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_event.dart';
@@ -33,6 +34,12 @@ class _SettingsView extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       body: BlocConsumer<SettingsBloc, SettingsState>(
+        listenWhen: (previous, current) {
+          if (current is! SettingsLoaded || !current.logoutRequested) {
+            return false;
+          }
+          return previous is! SettingsLoaded || !previous.logoutRequested;
+        },
         listener: (context, state) {
           if (state is SettingsLoaded && state.logoutRequested) {
             context.read<AuthSessionBloc>().add(const AuthSessionLoggedOut());
@@ -40,7 +47,7 @@ class _SettingsView extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is! SettingsLoaded) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppLoadingIndicator();
           }
 
           final session = context.watch<AuthSessionBloc>().state;

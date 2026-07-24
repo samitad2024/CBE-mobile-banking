@@ -22,14 +22,14 @@ Ship a **mock-first** Flutter rebuild of Commercial Bank of Ethiopia mobile bank
 
 ### Definition of “done” for whole v1
 
-- [ ] Every PDF screen/sheet/modal has a route + Bloc-backed presentation
-- [ ] Auth session gate works (unauthenticated → login; authenticated → shell)
-- [ ] Transfer and Request money complete end-to-end on mock data with Confirm → Success
-- [ ] Balances / accounts masked by default; Show/Hide via events
-- [ ] `flutter analyze` clean; unit tests for every Bloc (golden + failure + double-submit where money/auth)
-- [ ] Zero Cubit references in `lib/` and `test/`
-- [ ] No business logic in Widgets; UI only `add(Event)` + render `State`
-- [ ] Logging redaction audit passes (no PIN/token/full PAN in logs)
+- [x] Every PDF screen/sheet/modal has a route + Bloc-backed presentation
+- [x] Auth session gate works (unauthenticated → login; authenticated → shell)
+- [x] Transfer and Request money complete end-to-end on mock data with Confirm → Success
+- [x] Balances / accounts masked by default; Show/Hide via events
+- [x] `flutter analyze` clean; unit tests for every Bloc (golden + failure + double-submit where money/auth)
+- [x] Zero Cubit references in `lib/` and `test/`
+- [x] No business logic in Widgets; UI only `add(Event)` + render `State`
+- [x] Logging redaction audit passes (no PIN/token/full PAN in logs)
 
 ### Non-negotiable rules
 
@@ -424,11 +424,11 @@ lib/
 
 | Control | Notes |
 |---------|-------|
-| App lock idle timeout | `AppLockBloc` + lifecycle |
-| FLAG_SECURE / iOS screen capture | Sensitive: Login, Transfer confirm, Receipt |
-| Cert pinning | Dio adapter hook — implement only with real hosts |
-| Root/jailbreak | Plugin later; gate high-risk actions |
-| PIN hash at rest | If persisting unlock secret: salted hash only |
+| App lock idle timeout | **Done** — `AppLockBloc` + lifecycle; idle = 45s (`AppConstants.appLockIdleTimeout`) |
+| FLAG_SECURE / iOS screen capture | **Done** — `SecureScreen` / MethodChannel on Login, Transfer, Receipt |
+| Cert pinning | **Deferred** — Dio adapter hook only when real hosts land (A11) |
+| Root/jailbreak | **Deferred** — plugin later; gate high-risk actions (A12) |
+| PIN hash at rest | N/A mock — PIN never persisted; unlock uses biometrics / re-entry |
 
 ### Logging redaction policy
 
@@ -891,13 +891,15 @@ Stop when Step X Definition of Done is met. Do not start Step X+1.
 | A8 | Existing Blocs already scaffolded | Harden to this blueprint’s state machines; add AuthSession/AppLock |
 | A9 | Transactions not in bottom nav | Reachable from Home (PDF doesn’t give tab) |
 | A10 | Offline | Failure state + retry; no offline DB in v1 |
+| A11 | Cert pinning | Deferred until production API hosts exist |
+| A12 | Root/jailbreak detection | Deferred post-mock; not required for v1 demo |
+| A13 | Idle lock duration | **45s** background idle (`AppConstants.appLockIdleTimeout`) |
+| A14 | Unlock after idle | Biometric preferred via overlay; PIN login remains available |
+| A15 | “3 Requests → Proceed” | Opens `/requests` inbox (not Create Request) |
 
 ### Open questions (product/design)
 
-1. Idle lock timeout duration (proposal: 60s background)?  
-2. Is biometric enough to unlock after idle, or always PIN?  
-3. Should “3 Requests → Proceed” open Request list or Request money? (Proposal: navigate `/request` until requests inbox designed.)  
-
+_None blocking v1 mock — prior open questions resolved in A13–A15._
 ---
 
 ## Appendix — Forbidden list (enforcement)

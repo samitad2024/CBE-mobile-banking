@@ -2,6 +2,7 @@ import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/app/router/app_router.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_empty_state.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_loading_indicator.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/features/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class _WalletView extends StatelessWidget {
       body: BlocBuilder<WalletBloc, WalletState>(
         builder: (context, state) {
           if (state is WalletLoading || state is WalletInitial) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppLoadingIndicator(label: 'Loading wallets…');
           }
           if (state is! WalletLoaded) {
             return const SizedBox.shrink();

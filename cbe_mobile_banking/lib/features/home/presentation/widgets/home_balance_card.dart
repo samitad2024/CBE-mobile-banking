@@ -160,22 +160,50 @@ class _GuillochePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.plum.withValues(alpha: 0.08)
+      ..color = AppColors.plum.withValues(alpha: 0.09)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
+      ..strokeWidth = 1;
 
-    final path = Path();
-    for (var wave = 0; wave < 5; wave++) {
-      final yBase = size.height * (0.35 + wave * 0.12);
-      path.moveTo(0, yBase);
-      for (var x = 0.0; x <= size.width; x += 4) {
-        final y = yBase +
-            math.sin((x / size.width) * math.pi * 3 + wave) * 10 +
-            math.cos((x / size.width) * math.pi * 5) * 4;
-        path.lineTo(x, y);
+    final center = Offset(size.width * 0.78, size.height * 0.42);
+    final maxR = size.shortestSide * 0.55;
+
+    for (var ring = 1; ring <= 7; ring++) {
+      final r = maxR * (ring / 7);
+      canvas.drawCircle(center, r, paint);
+    }
+
+    final petal = Path();
+    for (var i = 0; i <= 180; i++) {
+      final t = i / 180 * math.pi * 2;
+      final r = maxR *
+          (0.35 +
+              0.22 * math.sin(6 * t) +
+              0.08 * math.cos(12 * t));
+      final p = Offset(
+        center.dx + r * math.cos(t),
+        center.dy + r * math.sin(t),
+      );
+      if (i == 0) {
+        petal.moveTo(p.dx, p.dy);
+      } else {
+        petal.lineTo(p.dx, p.dy);
       }
     }
-    canvas.drawPath(path, paint);
+    petal.close();
+    canvas.drawPath(petal, paint);
+
+    final waves = Path();
+    for (var wave = 0; wave < 4; wave++) {
+      final yBase = size.height * (0.55 + wave * 0.1);
+      waves.moveTo(0, yBase);
+      for (var x = 0.0; x <= size.width; x += 3) {
+        final y = yBase +
+            math.sin((x / size.width) * math.pi * 4 + wave) * 8 +
+            math.cos((x / size.width) * math.pi * 7) * 3;
+        waves.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(waves, paint);
   }
 
   @override

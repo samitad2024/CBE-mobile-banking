@@ -1,6 +1,8 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_empty_state.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_error_state.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_loading_indicator.dart';
 import 'package:cbe_mobile_banking/core/widgets/secure_screen.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/bloc/transactions_bloc.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/bloc/transactions_event.dart';
@@ -64,22 +66,14 @@ class _TransactionsViewState extends State<_TransactionsView> {
         },
         builder: (context, state) {
           if (state is TransactionsLoading || state is TransactionsInitial) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppLoadingIndicator(label: 'Loading transactions…');
           }
           if (state is TransactionsFailureState) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(state.message),
-                  TextButton(
-                    onPressed: () => context
-                        .read<TransactionsBloc>()
-                        .add(const TransactionsRefreshed()),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+            return AppErrorState(
+              message: state.message,
+              onRetry: () => context
+                  .read<TransactionsBloc>()
+                  .add(const TransactionsRefreshed()),
             );
           }
           if (state is! TransactionsLoaded) {

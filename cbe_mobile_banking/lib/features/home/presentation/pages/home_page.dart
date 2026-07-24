@@ -1,6 +1,8 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/app/router/app_router.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_error_state.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_loading_indicator.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_search_field.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_secondary_button.dart';
@@ -40,21 +42,13 @@ class _HomeView extends StatelessWidget {
         child: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
             if (state is HomeLoading || state is HomeInitial) {
-              return const Center(child: CircularProgressIndicator());
+              return const AppLoadingIndicator(label: 'Loading dashboard…');
             }
             if (state is HomeFailureState) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(state.message),
-                    TextButton(
-                      onPressed: () =>
-                          context.read<HomeBloc>().add(const HomeRefreshed()),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+              return AppErrorState(
+                message: state.message,
+                onRetry: () =>
+                    context.read<HomeBloc>().add(const HomeRefreshed()),
               );
             }
             if (state is! HomeLoaded) {

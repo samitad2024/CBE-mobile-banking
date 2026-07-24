@@ -3,6 +3,7 @@ import 'package:cbe_mobile_banking/app/router/app_router.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/utils/account_masker.dart';
 import 'package:cbe_mobile_banking/core/utils/money_formatter.dart';
+import 'package:cbe_mobile_banking/core/widgets/app_loading_indicator.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_search_field.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_secondary_button.dart';
@@ -56,7 +57,7 @@ class _RequestMoneyView extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is RequestMoneySubmitting) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppLoadingIndicator(label: 'Creating request…');
           }
           if (state is RequestMoneySuccessState) {
             return _SuccessView(request: state.request);
