@@ -1,5 +1,6 @@
 import 'package:cbe_mobile_banking/core/error/failures.dart';
 import 'package:cbe_mobile_banking/features/request_money/data/datasources/request_money_mock_datasource.dart';
+import 'package:cbe_mobile_banking/features/request_money/domain/entities/incoming_request_entity.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/entities/payment_request_entity.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/repositories/request_money_repository.dart';
 
@@ -25,6 +26,17 @@ class RequestMoneyRepositoryImpl implements RequestMoneyRepository {
       return (failure: null, request: request);
     } on Exception {
       return (failure: const UnexpectedFailure(), request: null);
+    }
+  }
+
+  @override
+  Future<({Failure? failure, List<IncomingRequestEntity>? items})>
+      getPendingRequests() async {
+    try {
+      final items = await _mockDataSource.fetchPendingRequests();
+      return (failure: null, items: items);
+    } on Exception {
+      return (failure: const UnexpectedFailure(), items: null);
     }
   }
 }

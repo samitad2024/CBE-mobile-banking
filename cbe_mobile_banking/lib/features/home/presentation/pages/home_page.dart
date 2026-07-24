@@ -102,7 +102,7 @@ class _HomeView extends StatelessWidget {
                   const SizedBox(height: 16),
                   HomeRequestsBanner(
                     count: state.dashboard.pendingRequestCount,
-                    onProceed: () => context.push(AppRoutes.requestMoney),
+                    onProceed: () => context.push(AppRoutes.requestsInbox),
                   ),
                   const SizedBox(height: 22),
                   HomeTransferAgainRow(

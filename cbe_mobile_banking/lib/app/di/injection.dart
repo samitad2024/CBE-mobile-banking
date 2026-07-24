@@ -29,7 +29,9 @@ import 'package:cbe_mobile_banking/features/request_money/data/datasources/reque
 import 'package:cbe_mobile_banking/features/request_money/data/repositories/request_money_repository_impl.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/repositories/request_money_repository.dart';
 import 'package:cbe_mobile_banking/features/request_money/domain/usecases/create_payment_request_usecase.dart';
+import 'package:cbe_mobile_banking/features/request_money/domain/usecases/get_pending_requests_usecase.dart';
 import 'package:cbe_mobile_banking/features/request_money/presentation/bloc/request_money_bloc.dart';
+import 'package:cbe_mobile_banking/features/request_money/presentation/bloc/requests_inbox_bloc.dart';
 import 'package:cbe_mobile_banking/features/scan/presentation/bloc/scan_bloc.dart';
 import 'package:cbe_mobile_banking/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:cbe_mobile_banking/features/transactions/data/datasources/transactions_mock_datasource.dart';
@@ -155,8 +157,12 @@ void _registerRequestMoney() {
       () => RequestMoneyRepositoryImpl(mockDataSource: sl()),
     )
     ..registerLazySingleton(() => CreatePaymentRequestUseCase(sl()))
+    ..registerLazySingleton(() => GetPendingRequestsUseCase(sl()))
     ..registerFactory(
       () => RequestMoneyBloc(createPaymentRequest: sl()),
+    )
+    ..registerFactory(
+      () => RequestsInboxBloc(getPendingRequests: sl()),
     );
 }
 

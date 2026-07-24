@@ -4,6 +4,7 @@ import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_
 import 'package:cbe_mobile_banking/features/auth/presentation/pages/login_page.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/pages/home_page.dart';
 import 'package:cbe_mobile_banking/features/request_money/presentation/pages/request_money_page.dart';
+import 'package:cbe_mobile_banking/features/request_money/presentation/pages/requests_inbox_page.dart';
 import 'package:cbe_mobile_banking/features/scan/presentation/pages/scan_page.dart';
 import 'package:cbe_mobile_banking/features/settings/presentation/pages/settings_page.dart';
 import 'package:cbe_mobile_banking/features/shell/presentation/pages/main_shell.dart';
@@ -20,6 +21,7 @@ abstract final class AppRoutes {
   static const String home = '/home';
   static const String transfer = '/transfer';
   static const String requestMoney = '/request';
+  static const String requestsInbox = '/requests';
   static const String scan = '/scan';
   static const String transactions = '/transactions';
   static const String wallet = '/wallet';
@@ -134,6 +136,13 @@ abstract final class AppRouter {
           name: 'requestMoney',
           builder: (BuildContext context, GoRouterState state) {
             return const RequestMoneyPage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.requestsInbox,
+          name: 'requestsInbox',
+          builder: (BuildContext context, GoRouterState state) {
+            return const RequestsInboxPage();
           },
         ),
         GoRoute(
