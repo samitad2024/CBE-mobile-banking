@@ -1,4 +1,5 @@
 import 'package:cbe_mobile_banking/features/transfer/domain/entities/transfer_entity.dart';
+import 'package:cbe_mobile_banking/features/transfer/domain/entities/transfer_prefill.dart';
 import 'package:equatable/equatable.dart';
 
 sealed class TransferEvent extends Equatable {
@@ -9,7 +10,12 @@ sealed class TransferEvent extends Equatable {
 }
 
 final class TransferStarted extends TransferEvent {
-  const TransferStarted();
+  const TransferStarted({this.prefill});
+
+  final TransferPrefill? prefill;
+
+  @override
+  List<Object?> get props => [prefill];
 }
 
 final class TransferRailSelected extends TransferEvent {

@@ -27,7 +27,19 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
   void _onStarted(TransferStarted event, Emitter<TransferState> emit) {
     _processedKeys.clear();
     _lastDraft = null;
-    emit(const TransferFormState());
+    final prefill = event.prefill;
+    if (prefill == null || prefill.isEmpty) {
+      emit(const TransferFormState());
+      return;
+    }
+    emit(
+      TransferFormState(
+        rail: prefill.rail ?? TransferRail.payment,
+        receiverName: prefill.receiverName ?? '',
+        destination: prefill.destination ?? '',
+        amountText: prefill.amountText ?? '',
+      ),
+    );
   }
 
   void _onRailSelected(

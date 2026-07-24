@@ -9,6 +9,7 @@ import 'package:cbe_mobile_banking/features/scan/presentation/pages/scan_page.da
 import 'package:cbe_mobile_banking/features/settings/presentation/pages/settings_page.dart';
 import 'package:cbe_mobile_banking/features/shell/presentation/pages/main_shell.dart';
 import 'package:cbe_mobile_banking/features/transactions/presentation/pages/transactions_page.dart';
+import 'package:cbe_mobile_banking/features/transfer/domain/entities/transfer_prefill.dart';
 import 'package:cbe_mobile_banking/features/transfer/presentation/pages/transfer_page.dart';
 import 'package:cbe_mobile_banking/features/wallet/presentation/pages/wallet_page.dart';
 import 'package:flutter/material.dart';
@@ -128,7 +129,13 @@ abstract final class AppRouter {
           path: AppRoutes.transfer,
           name: 'transfer',
           builder: (BuildContext context, GoRouterState state) {
-            return const TransferPage();
+            final extra = state.extra;
+            final prefill = switch (extra) {
+              final TransferPrefill value => value,
+              final String raw => PaymentQrParser.tryParse(raw),
+              _ => null,
+            };
+            return TransferPage(prefill: prefill);
           },
         ),
         GoRoute(

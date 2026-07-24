@@ -1,5 +1,6 @@
 import 'package:cbe_mobile_banking/core/error/failures.dart';
 import 'package:cbe_mobile_banking/features/transfer/domain/entities/transfer_entity.dart';
+import 'package:cbe_mobile_banking/features/transfer/domain/entities/transfer_prefill.dart';
 import 'package:cbe_mobile_banking/features/transfer/domain/repositories/transfer_repository.dart';
 import 'package:cbe_mobile_banking/features/transfer/domain/usecases/submit_transfer_usecase.dart';
 import 'package:cbe_mobile_banking/features/transfer/presentation/bloc/transfer_bloc.dart';
@@ -84,5 +85,25 @@ void main() {
     form as TransferFormState;
     expect(form.receiverName, 'Ada');
     expect(form.destination, '1000');
+  });
+
+  test('TransferStarted with prefill seeds form', () async {
+    bloc.add(
+      const TransferStarted(
+        prefill: TransferPrefill(
+          rail: TransferRail.payment,
+          receiverName: 'QR Payment',
+          destination: 'MOCK',
+          amountText: '50000',
+        ),
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    final form = bloc.state;
+    expect(form, isA<TransferFormState>());
+    form as TransferFormState;
+    expect(form.rail, TransferRail.payment);
+    expect(form.destination, 'MOCK');
+    expect(form.amountText, '50000');
   });
 }

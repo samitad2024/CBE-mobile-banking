@@ -1,4 +1,5 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
+import 'package:cbe_mobile_banking/app/router/app_router.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_secondary_button.dart';
@@ -7,6 +8,7 @@ import 'package:cbe_mobile_banking/features/scan/presentation/bloc/scan_bloc.dar
 import 'package:cbe_mobile_banking/features/scan/presentation/widgets/camera_scan_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class ScanPage extends StatelessWidget {
   const ScanPage({super.key});
@@ -147,10 +149,9 @@ class _ScanViewState extends State<_ScanView> {
                     label: 'Use for transfer',
                     icon: Icons.north_east,
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Payload ready: ${state.payload}'),
-                        ),
+                      context.push(
+                        AppRoutes.transfer,
+                        extra: state.payload,
                       );
                     },
                   ),

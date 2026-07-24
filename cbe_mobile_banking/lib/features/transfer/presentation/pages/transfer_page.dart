@@ -9,6 +9,7 @@ import 'package:cbe_mobile_banking/core/widgets/transfer_request_toggle.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_state.dart';
 import 'package:cbe_mobile_banking/features/transfer/domain/entities/transfer_entity.dart';
+import 'package:cbe_mobile_banking/features/transfer/domain/entities/transfer_prefill.dart';
 import 'package:cbe_mobile_banking/features/transfer/presentation/bloc/transfer_bloc.dart';
 import 'package:cbe_mobile_banking/features/transfer/presentation/bloc/transfer_event.dart';
 import 'package:cbe_mobile_banking/features/transfer/presentation/bloc/transfer_state.dart';
@@ -20,12 +21,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class TransferPage extends StatelessWidget {
-  const TransferPage({super.key});
+  const TransferPage({this.prefill, super.key});
+
+  final TransferPrefill? prefill;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<TransferBloc>()..add(const TransferStarted()),
+      create: (_) => sl<TransferBloc>()..add(TransferStarted(prefill: prefill)),
       child: const SecureScreen(child: _TransferView()),
     );
   }
