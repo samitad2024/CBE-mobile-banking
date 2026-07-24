@@ -39,6 +39,12 @@ abstract final class AppTheme {
         backgroundColor: AppColors.peach,
         foregroundColor: AppColors.plum,
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.plum,
+        indicatorColor: AppColors.peach.withValues(alpha: 0.18),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+        height: 68,
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.plum,

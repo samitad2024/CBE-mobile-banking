@@ -1,14 +1,16 @@
 import 'package:cbe_mobile_banking/app/di/injection.dart';
 import 'package:cbe_mobile_banking/app/router/app_router.dart';
 import 'package:cbe_mobile_banking/core/theme/app_colors.dart';
-import 'package:cbe_mobile_banking/core/utils/account_masker.dart';
-import 'package:cbe_mobile_banking/core/utils/money_formatter.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_primary_button.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_search_field.dart';
 import 'package:cbe_mobile_banking/core/widgets/app_secondary_button.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/bloc/home_bloc.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/bloc/home_event.dart';
 import 'package:cbe_mobile_banking/features/home/presentation/bloc/home_state.dart';
+import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_balance_card.dart';
+import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_requests_banner.dart';
+import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_service_tile.dart';
+import 'package:cbe_mobile_banking/features/home/presentation/widgets/home_transfer_again_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +33,7 @@ class _HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.plumDeep,
       body: SafeArea(
         child: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
@@ -55,94 +58,33 @@ class _HomeView extends StatelessWidget {
             if (state is! HomeLoaded) {
               return const SizedBox.shrink();
             }
-            final account = state.dashboard.account;
-            final balanceText = state.isBalanceVisible
-                ? MoneyFormatter.formatEtb(account.balanceEtb)
-                : '****** ETB';
+
             return RefreshIndicator(
+              color: AppColors.peach,
               onRefresh: () async {
                 context.read<HomeBloc>().add(const HomeRefreshed());
               },
               child: ListView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
                 children: [
-                  const AppSearchField(),
-                  const SizedBox(height: 16),
-                  Card(
-                    color: AppColors.peach,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            account.customerName,
-                            style: const TextStyle(
-                              color: AppColors.plum,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            AccountMasker.mask(account.accountNumber),
-                            style: const TextStyle(color: AppColors.plum),
-                          ),
-                          const SizedBox(height: 12),
-                          Semantics(
-                            label: state.isBalanceVisible
-                                ? 'Balance $balanceText'
-                                : 'Balance hidden',
-                            child: Text(
-                              balanceText,
-                              style: const TextStyle(
-                                color: AppColors.plum,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () => context.read<HomeBloc>().add(
-                                    const HomeBalanceVisibilityToggled(),
-                                  ),
-                              child: Text(
-                                state.isBalanceVisible ? 'Hide' : 'Show',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  AppSearchField(
+                    onQrTap: () => context.go(AppRoutes.scan),
                   ),
-                  const SizedBox(height: 16),
-                  if (state.dashboard.pendingRequestCount > 0)
-                    ListTile(
-                      tileColor: AppColors.plum,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      title: Text(
-                        '${state.dashboard.pendingRequestCount} Requests',
-                        style: const TextStyle(color: AppColors.white),
-                      ),
-                      trailing: TextButton(
-                        onPressed: () => context.push(AppRoutes.requestMoney),
-                        child: const Text(
-                          'Proceed',
-                          style: TextStyle(color: AppColors.peach),
+                  const SizedBox(height: 18),
+                  HomeBalanceCard(
+                    account: state.dashboard.account,
+                    isBalanceVisible: state.isBalanceVisible,
+                    onToggleVisibility: () => context.read<HomeBloc>().add(
+                          const HomeBalanceVisibilityToggled(),
                         ),
-                      ),
-                    ),
-                  const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 18),
                   Row(
                     children: [
                       Expanded(
                         child: AppPrimaryButton(
                           label: 'Transfer',
+                          icon: Icons.north_east,
                           onPressed: () => context.push(AppRoutes.transfer),
                         ),
                       ),
@@ -150,47 +92,50 @@ class _HomeView extends StatelessWidget {
                       Expanded(
                         child: AppSecondaryButton(
                           label: 'Request',
+                          icon: Icons.south_west,
                           onPressed: () =>
                               context.push(AppRoutes.requestMoney),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Transfer Again',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  const SizedBox(height: 16),
+                  HomeRequestsBanner(
+                    count: state.dashboard.pendingRequestCount,
+                    onProceed: () => context.push(AppRoutes.requestMoney),
                   ),
-                  const SizedBox(height: 8),
-                  if (state.dashboard.recentRecipients.isEmpty)
-                    const Text('No recent recipients')
-                  else
-                    SizedBox(
-                      height: 72,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: state.dashboard.recentRecipients.length,
-                        separatorBuilder: (_, _) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final r = state.dashboard.recentRecipients[index];
-                          return Column(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: AppColors.peach,
-                                child: Text(
-                                  r.initial,
-                                  style: const TextStyle(color: AppColors.plum),
-                                ),
-                              ),
-                              Text(r.lastFour),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  TextButton(
-                    onPressed: () => context.push(AppRoutes.transactions),
-                    child: const Text('Transactions'),
+                  const SizedBox(height: 22),
+                  HomeTransferAgainRow(
+                    recipients: state.dashboard.recentRecipients,
+                    onRecipientTap: (_) => context.push(AppRoutes.transfer),
+                  ),
+                  const SizedBox(height: 20),
+                  HomeServiceTile(
+                    icon: Icons.account_balance_outlined,
+                    title: 'Transfer to Bank',
+                    subtitle: 'Transfer across 31 banks in the country',
+                    onTap: () => context.push(AppRoutes.transfer),
+                  ),
+                  const SizedBox(height: 10),
+                  HomeServiceTile(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'Transfer to Wallet',
+                    subtitle: 'CBE birr, Tele birr and 17 more',
+                    onTap: () => context.push(AppRoutes.transfer),
+                  ),
+                  const SizedBox(height: 10),
+                  HomeServiceTile(
+                    icon: Icons.payments_outlined,
+                    title: 'Payments',
+                    subtitle: 'Utilities, schools, and merchants',
+                    onTap: () => context.push(AppRoutes.transfer),
+                  ),
+                  const SizedBox(height: 10),
+                  HomeServiceTile(
+                    icon: Icons.receipt_long_outlined,
+                    title: 'Transactions',
+                    subtitle: 'View history and download receipts',
+                    onTap: () => context.push(AppRoutes.transactions),
                   ),
                 ],
               ),

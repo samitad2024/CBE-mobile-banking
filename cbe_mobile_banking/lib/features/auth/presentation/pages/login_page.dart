@@ -7,10 +7,13 @@ import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_event.da
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_bloc.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_session_event.dart';
 import 'package:cbe_mobile_banking/features/auth/presentation/bloc/auth_state.dart';
+import 'package:cbe_mobile_banking/features/auth/presentation/widgets/biometric_button.dart';
+import 'package:cbe_mobile_banking/features/auth/presentation/widgets/cbe_brand_header.dart';
+import 'package:cbe_mobile_banking/features/auth/presentation/widgets/pin_dots_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Login placeholder aligned to PDF (PIN + biometrics). Pixel UI later.
+/// Login screen aligned to PDF p.1 (PIN dots + biometric).
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
@@ -31,12 +34,11 @@ class _LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<_LoginView> {
-  final _pinController = TextEditingController();
+  String _pin = '';
 
-  @override
-  void dispose() {
-    _pinController.dispose();
-    super.dispose();
+  void _submit(BuildContext context) {
+    if (_pin.length != AppConstants.pinLength) return;
+    context.read<AuthBloc>().add(AuthPinSubmitted(_pin));
   }
 
   @override
@@ -56,69 +58,43 @@ class _LoginViewState extends State<_LoginView> {
       },
       builder: (context, state) {
         final loading = state is AuthLoading;
+        final canSubmit = !loading && _pin.length == AppConstants.pinLength;
         return Scaffold(
+          backgroundColor: AppColors.plumDeep,
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Column(
                 children: [
-                  const Spacer(),
-                  Text(
-                    'COMMERCIAL BANK OF ETHIOPIA',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.peach,
-                          fontWeight: FontWeight.w700,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 48),
+                  const CbeBrandHeader(),
+                  const Spacer(flex: 2),
                   Text(
                     'Insert Pin or Use Biometrics to Log In',
-                    style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: _pinController,
-                    obscureText: true,
-                    keyboardType: TextInputType.number,
-                    maxLength: AppConstants.pinLength,
-                    decoration: const InputDecoration(
-                      labelText: 'PIN',
-                      counterText: '',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  AppPrimaryButton(
-                    label: loading ? 'Please wait…' : 'Log In',
-                    onPressed: loading
-                        ? null
-                        : () {
-                            context.read<AuthBloc>().add(
-                                  AuthPinSubmitted(_pinController.text),
-                                );
-                          },
-                  ),
-                  const SizedBox(height: 24),
-                  IconButton(
-                    iconSize: 56,
-                    color: AppColors.peach,
-                    onPressed: loading
-                        ? null
-                        : () {
-                            context.read<AuthBloc>().add(
-                                  const AuthBiometricRequested(),
-                                );
-                          },
-                    icon: const Icon(Icons.fingerprint),
-                  ),
-                  Text(
-                    'Mock PIN: ${AppConstants.mockPin}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.muted,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w500,
                         ),
                   ),
+                  const SizedBox(height: 28),
+                  PinDotsField(
+                    enabled: !loading,
+                    onChanged: (pin) => setState(() => _pin = pin),
+                  ),
+                  const SizedBox(height: 28),
+                  AppPrimaryButton(
+                    label: loading ? 'Please wait…' : 'Log In',
+                    onPressed: canSubmit ? () => _submit(context) : null,
+                  ),
                   const Spacer(),
+                  BiometricButton(
+                    enabled: !loading,
+                    onPressed: () => context.read<AuthBloc>().add(
+                          const AuthBiometricRequested(),
+                        ),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
